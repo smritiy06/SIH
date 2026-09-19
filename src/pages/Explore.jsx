@@ -7,37 +7,37 @@ const Explore = () => {
       name: 'Jaipur',
       region: 'Rajasthan',
       tags: 'Forts · Culture · Royal Heritage',
-      image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/jaipur/800/600',
     },
     {
       name: 'Goa',
       region: 'West Coast',
       tags: 'Beaches · Nightlife · Portuguese Heritage',
-      image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/goa/800/600',
     },
     {
       name: 'Varanasi',
       region: 'Uttar Pradesh',
       tags: 'Ghats · Spirituality · Ancient Culture',
-      image: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/varanasi/800/600',
     },
     {
       name: 'Kerala',
       region: 'South India',
       tags: 'Backwaters · Ayurveda · Nature',
-      image: 'https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/kerala/800/600',
     },
     {
       name: 'Manali',
       region: 'Himachal Pradesh',
       tags: 'Mountains · Adventure · Snow',
-      image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/manali/800/600',
     },
     {
       name: 'Rishikesh',
       region: 'Uttarakhand',
       tags: 'Yoga · Rafting · Spirituality',
-      image: 'https://images.unsplash.com/photo-1600011689032-7b62ca555da7?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/rishikesh/800/600',
     },
   ];
 
@@ -46,25 +46,25 @@ const Explore = () => {
       name: 'Meghalaya',
       region: 'Northeast India',
       tags: 'Living Root Bridges · Waterfalls · Caves',
-      image: 'https://images.unsplash.com/photo-1579034261794-cf564887df92?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/meghalaya/800/600',
     },
     {
       name: 'Spiti Valley',
       region: 'Himachal Pradesh',
       tags: 'Cold Desert · Monasteries · Stargazing',
-      image: 'https://images.unsplash.com/photo-1582414169601-52796e6761ea?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/spiti/800/600',
     },
     {
       name: 'Andaman Islands',
       region: 'Bay of Bengal',
       tags: 'White Beaches · Diving · Coral Reefs',
-      image: 'https://images.unsplash.com/photo-1588722230671-2945d8f07011?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/andaman/800/600',
     },
     {
       name: 'Hampi',
       region: 'Karnataka',
       tags: 'Ruins · Boulders · History',
-      image: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/hampi/800/600',
     },
   ];
 

@@ -6,6 +6,7 @@ import PlanTrip from './pages/PlanTrip';
 import Dashboard from './pages/Dashboard';
 import Safety from './pages/Safety';
 import Explore from './pages/Explore';
+import SignIn from './pages/SignIn';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="plan" element={<PlanTrip />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="safety" element={<Safety />} />
+            <Route path="signin" element={<SignIn />} />
           </Route>
         </Routes>
       </BrowserRouter>

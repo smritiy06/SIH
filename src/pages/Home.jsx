@@ -60,37 +60,37 @@ const Home = () => {
       name: 'Jaipur',
       region: 'Rajasthan',
       tags: 'Forts · Culture · Royal Heritage',
-      image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/jaipur/800/600',
     },
     {
       name: 'Goa',
       region: 'West Coast',
       tags: 'Beaches · Nightlife · Portuguese Heritage',
-      image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/goa/800/600',
     },
     {
       name: 'Varanasi',
       region: 'Uttar Pradesh',
       tags: 'Ghats · Spirituality · Ancient Culture',
-      image: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/varanasi/800/600',
     },
     {
       name: 'Kerala',
       region: 'South India',
       tags: 'Backwaters · Ayurveda · Nature',
-      image: 'https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/kerala/800/600',
     },
     {
       name: 'Manali',
       region: 'Himachal Pradesh',
       tags: 'Mountains · Adventure · Snow',
-      image: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/manali/800/600',
     },
     {
       name: 'Udaipur',
       region: 'Rajasthan',
       tags: 'Lakes · Palaces · Romance',
-      image: 'https://images.unsplash.com/photo-1585135497273-1a86d9d9c5e5?auto=format&fit=crop&w=800&q=80',
+      image: 'https://picsum.photos/seed/udaipur/800/600',
     },
   ];
 
@@ -107,14 +107,13 @@ const Home = () => {
   return (
     <div className="min-h-screen">
       {/* ===== HERO ===== */}
-      <section className="relative h-[92vh] min-h-[600px] flex items-center justify-center">
-        {/* Background image */}
-        <img
-          src="https://images.unsplash.com/photo-1585135497273-1a86d9d9c5e5?auto=format&fit=crop&w=2400&q=80"
-          alt="Udaipur, Rajasthan — Lake Palace at sunset"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/50" />
+      <section 
+        className="relative h-[92vh] min-h-[600px] flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/hero-bg.jpg)' }}
+      >
+        {/* Subtle overlay that doesn't wash out the image */}
+        <div className="absolute inset-0 bg-black/30" />
+
 
         {/* Hero content */}
         <div className="relative z-10 text-center px-4 max-w-3xl mx-auto w-full">

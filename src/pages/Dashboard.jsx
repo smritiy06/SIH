@@ -35,7 +35,21 @@ const Dashboard = () => {
             getNearbyPlaces(lat, lon, 'accommodation', 10000),
             getLocalEvents(lat, lon)
           ]);
-          setPlaces({ attractions, food, accommodation: hotels });
+          
+          // Mock data fallbacks for food and accommodation
+          const finalFood = food.length > 0 ? food : [
+            { id: 'f1', name: 'The Royal Spice', type: 'restaurant', cuisine: 'Authentic Indian', stars: 4 },
+            { id: 'f2', name: 'Bazaar Cafe', type: 'cafe', cuisine: 'Coffee & Snacks', stars: 4 },
+            { id: 'f3', name: 'Streetside Delights', type: 'food', cuisine: 'Local Street Food', stars: 5 }
+          ];
+          
+          const finalHotels = hotels.length > 0 ? hotels : [
+            { id: 'h1', name: 'Grand Plaza Hotel', type: 'hotel', stars: 5 },
+            { id: 'h2', name: 'Cozy Homestay', type: 'guest_house', stars: 4 },
+            { id: 'h3', name: 'Backpacker Haven', type: 'hostel', stars: 3 }
+          ];
+
+          setPlaces({ attractions, food: finalFood, accommodation: finalHotels });
           setEvents(localEvents);
         } catch (e) { console.error('Failed to load places or events'); }
       } catch (err) { console.error(err); }
@@ -60,8 +74,24 @@ const Dashboard = () => {
   const generateItinerary = () => {
     const itinerary = [];
     const usedAttractions = new Set();
-    const availableAttractions = [...places.attractions];
-    const availableFood = [...places.food];
+    
+    // Mock data fallback if APIs return no places
+    const mockAttractions = [
+      { id: 'm1', name: 'City Center Tour', type: 'attraction' },
+      { id: 'm2', name: 'Local Museum', type: 'museum' },
+      { id: 'm3', name: 'Historic Monument', type: 'monument' },
+      { id: 'm4', name: 'Central Park', type: 'park' },
+      { id: 'm5', name: 'Market Walk', type: 'shopping' },
+      { id: 'm6', name: 'Sunset Viewpoint', type: 'viewpoint' },
+    ];
+    const mockFood = [
+      { id: 'f1', name: 'Traditional Cafe', type: 'restaurant', cuisine: 'Local' },
+      { id: 'f2', name: 'Street Food Hub', type: 'food', cuisine: 'Street Food' },
+    ];
+    
+    const availableAttractions = places.attractions.length > 0 ? [...places.attractions] : mockAttractions;
+    const availableFood = places.food.length > 0 ? [...places.food] : mockFood;
+
     for (let i = 0; i < numDays; i++) {
       const dayActivities = [];
       const morning = availableAttractions.find(a => !usedAttractions.has(a.id));

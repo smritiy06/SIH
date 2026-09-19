@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { searchDestinations } from '../../services/geocodingService';
 import { MapPin, Search, Loader2 } from 'lucide-react';
@@ -8,6 +9,7 @@ const DestinationSearch = ({ onSelect }) => {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef(null);
+  const isSelecting = useRef(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -21,17 +23,21 @@ const DestinationSearch = ({ onSelect }) => {
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (query.length < 3) {
+      if (query.length < 3 || isSelecting.current) {
         setResults([]);
         return;
       }
+      setIsOpen(true);
       setLoading(true);
       try {
         const data = await searchDestinations(query);
         setResults(data);
-        setIsOpen(true);
+        if (data.length > 0 && data[0].name.toLowerCase() === query.toLowerCase()) {
+          onSelect(data[0]);
+        }
       } catch (error) {
         console.error(error);
+        setResults([]);
       } finally {
         setLoading(false);
       }
@@ -41,9 +47,11 @@ const DestinationSearch = ({ onSelect }) => {
   }, [query]);
 
   const handleSelect = (place) => {
+    isSelecting.current = true;
     setQuery(place.name);
     setIsOpen(false);
     onSelect(place);
+    setTimeout(() => { isSelecting.current = false; }, 600);
   };
 
   return (
@@ -61,7 +69,18 @@ const DestinationSearch = ({ onSelect }) => {
           className="w-full pl-12 pr-4 py-3.5 bg-transparent border-0 focus:ring-0 placeholder-charcoal-700/40 dark:placeholder-night-500 text-charcoal-900 dark:text-night-800 text-sm font-sans outline-none"
           placeholder="Search Indian destinations, places or experiences..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            onSelect(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && isOpen) {
+              e.preventDefault();
+              if (results.length > 0) {
+                handleSelect(results[0]);
+              }
+            }
+          }}
           onFocus={() => { if (results.length > 0) setIsOpen(true); }}
         />
       </div>

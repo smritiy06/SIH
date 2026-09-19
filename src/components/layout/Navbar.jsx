@@ -1,12 +1,26 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Menu, X, Sun, Moon } from 'lucide-react';
-import { useState } from 'react';
+import { Menu, X, Sun, Moon, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import localforage from 'localforage';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const location = useLocation();
   const { isDark, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const savedUser = await localforage.getItem('user');
+        if (savedUser) setUser(savedUser);
+      } catch (err) {
+        console.error('Error loading user:', err);
+      }
+    };
+    loadUser();
+  }, [location.pathname]);
 
   const navLinks = [
     { name: 'Explore', path: '/explore' },
@@ -54,10 +68,6 @@ const Navbar = () => {
 
           {/* Right side */}
           <div className="hidden lg:flex items-center gap-3">
-            <button className="p-2 text-charcoal-700/60 dark:text-night-500 hover:text-charcoal-900 dark:hover:text-night-800 transition-colors" aria-label="Search">
-              <Search className="h-5 w-5" />
-            </button>
-            
             {/* Day/Night Toggle */}
             <button
               onClick={toggleTheme}
@@ -70,7 +80,14 @@ const Navbar = () => {
               </div>
             </button>
 
-            <Link to="/plan" className="btn-outline dark:border-night-300 dark:text-night-700 dark:hover:bg-night-200">Sign In</Link>
+            {user ? (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cream-100 dark:bg-night-200">
+                <User className="h-4 w-4 text-forest-700 dark:text-accent-500" />
+                <span className="text-sm font-medium text-charcoal-800 dark:text-night-700 capitalize">{user.name}</span>
+              </div>
+            ) : (
+              <Link to="/signin" className="btn-outline dark:border-night-300 dark:text-night-700 dark:hover:bg-night-200">Sign In</Link>
+            )}
             <Link to="/plan" className="btn-primary">Plan a Trip</Link>
           </div>
 
@@ -119,7 +136,21 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
-            <div className="pt-3 border-t border-black/[0.06] dark:border-night-200 mt-3">
+            <div className="pt-3 border-t border-black/[0.06] dark:border-night-200 mt-3 space-y-2">
+              {user ? (
+                <div className="flex items-center gap-2 px-4 py-3">
+                  <User className="h-5 w-5 text-forest-700 dark:text-accent-500" />
+                  <span className="text-sm font-medium text-charcoal-800 dark:text-night-700 capitalize">{user.name}</span>
+                </div>
+              ) : (
+                <Link
+                  to="/signin"
+                  onClick={() => setIsOpen(false)}
+                  className="btn-outline w-full justify-center"
+                >
+                  Sign In
+                </Link>
+              )}
               <Link
                 to="/plan"
                 onClick={() => setIsOpen(false)}
