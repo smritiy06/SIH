@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream-50 text-charcoal-800 antialiased font-sans;
+  }
+  .dark body,
+  body.dark-mode {
+    @apply bg-night-50 text-night-700;
+  }
+  h1, h2, h3 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-forest-700 text-white px-6 py-3 rounded-lg font-sans font-medium text-sm
+           hover:bg-forest-800 transition-all duration-200 inline-flex items-center gap-2;
+  }
+  .dark .btn-primary {
+    @apply bg-accent-600 hover:bg-accent-700;
+  }
+  .btn-outline {
+    @apply border border-charcoal-700/20 text-charcoal-800 px-5 py-2.5 rounded-lg font-sans font-medium text-sm
+           hover:bg-charcoal-800 hover:text-white transition-all duration-200;
+  }
+  .dark .btn-outline {
+    @apply border-night-300 text-night-700 hover:bg-night-200 hover:text-white;
+  }
+  .card {
+    @apply bg-white rounded-2xl border border-black/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.04)];
+  }
+  .dark .card {
+    @apply bg-night-100 border-night-200 shadow-none;
+  }
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto;
+  }
+}
+
+/* Dark mode body & transitions */
+.dark {
+  color-scheme: dark;
+}
+.dark body {
+  background-color: #1a1d23;
+  color: #d1d5db;
+}
+
+/* Smooth theme transition */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+/* Exclude animations from theme transition override */
+[class*="animate-"], [class*="transition-"] {
+  transition-property: all;
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  border-radius: 1rem;
+}

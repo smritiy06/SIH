@@ -1,0 +1,28 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
+import Layout from './components/layout/Layout';
+import Home from './pages/Home';
+import PlanTrip from './pages/PlanTrip';
+import Dashboard from './pages/Dashboard';
+import Safety from './pages/Safety';
+import Explore from './pages/Explore';
+
+function App() {
+  return (
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="explore" element={<Explore />} />
+            <Route path="plan" element={<PlanTrip />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="safety" element={<Safety />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+}
+
+export default App;
