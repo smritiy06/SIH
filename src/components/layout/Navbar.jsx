@@ -1,20 +1,21 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, User } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, Sun, Moon, User, LogOut, Map } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import localforage from 'localforage';
+import { getCurrentUser, logoutUser } from '../../services/authService';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const savedUser = await localforage.getItem('user');
-        if (savedUser) setUser(savedUser);
+        const savedUser = await getCurrentUser();
+        setUser(savedUser);
       } catch (err) {
         console.error('Error loading user:', err);
       }
@@ -22,10 +23,15 @@ const Navbar = () => {
     loadUser();
   }, [location.pathname]);
 
+  const handleLogout = async () => {
+    await logoutUser();
+    setUser(null);
+    navigate('/');
+  };
+
   const navLinks = [
     { name: 'Explore', path: '/explore' },
     { name: 'Plan a Trip', path: '/plan' },
-    { name: 'My Trips', path: '/dashboard' },
     { name: 'Safety', path: '/safety' },
   ];
 
@@ -64,6 +70,18 @@ const Navbar = () => {
                 )}
               </Link>
             ))}
+            {user && (
+              <Link
+                to="/mytrips"
+                className={`text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${
+                  isActive('/mytrips')
+                    ? 'text-forest-700 dark:text-accent-500'
+                    : 'text-charcoal-700/70 dark:text-night-600 hover:text-charcoal-900 dark:hover:text-night-800'
+                }`}
+              >
+                <Map className="h-4 w-4" /> My Trips
+              </Link>
+            )}
           </div>
 
           {/* Right side */}
@@ -81,9 +99,14 @@ const Navbar = () => {
             </button>
 
             {user ? (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cream-100 dark:bg-night-200">
-                <User className="h-4 w-4 text-forest-700 dark:text-accent-500" />
-                <span className="text-sm font-medium text-charcoal-800 dark:text-night-700 capitalize">{user.name}</span>
+              <div className="flex items-center gap-3 ml-2">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cream-100 dark:bg-night-200 border border-black/[0.04] dark:border-night-300">
+                  <User className="h-4 w-4 text-forest-700 dark:text-accent-500" />
+                  <span className="text-sm font-medium text-charcoal-800 dark:text-night-700 capitalize pr-1 border-r border-black/10 dark:border-night-400">{user.name}</span>
+                  <button onClick={handleLogout} className="text-charcoal-700/60 hover:text-red-500 dark:text-night-500 dark:hover:text-red-400 transition-colors" title="Log Out">
+                    <LogOut className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             ) : (
               <Link to="/signin" className="btn-outline dark:border-night-300 dark:text-night-700 dark:hover:bg-night-200">Sign In</Link>
@@ -136,12 +159,31 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
+            {user && (
+              <Link
+                to="/mytrips"
+                onClick={() => setIsOpen(false)}
+                className={`block px-4 py-3 rounded-xl text-sm font-medium ${
+                  isActive('/mytrips') ? 'bg-accent-50 dark:bg-night-200 text-forest-700 dark:text-accent-500' : 'text-charcoal-700 dark:text-night-600 hover:bg-cream-100 dark:hover:bg-night-100'
+                }`}
+              >
+                My Trips
+              </Link>
+            )}
             <div className="pt-3 border-t border-black/[0.06] dark:border-night-200 mt-3 space-y-2">
               {user ? (
-                <div className="flex items-center gap-2 px-4 py-3">
-                  <User className="h-5 w-5 text-forest-700 dark:text-accent-500" />
-                  <span className="text-sm font-medium text-charcoal-800 dark:text-night-700 capitalize">{user.name}</span>
-                </div>
+                <>
+                  <div className="flex items-center gap-2 px-4 py-3">
+                    <User className="h-5 w-5 text-forest-700 dark:text-accent-500" />
+                    <span className="text-sm font-medium text-charcoal-800 dark:text-night-700 capitalize">{user.name}</span>
+                  </div>
+                  <button
+                    onClick={() => { handleLogout(); setIsOpen(false); }}
+                    className="btn-outline w-full justify-center text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    Log Out
+                  </button>
+                </>
               ) : (
                 <Link
                   to="/signin"

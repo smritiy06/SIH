@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import DestinationSearch from '../components/ui/DestinationSearch';
 import { Calendar, Users, Wallet, ArrowRight, MapPin, Bed, Utensils, CloudSun, CalendarDays, ShieldCheck, Star, ChevronDown } from 'lucide-react';
 import localforage from 'localforage';
+import { getCurrentUser } from '../services/authService';
+import { getDestinationImage } from '../services/imageService';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -15,6 +17,26 @@ const Home = () => {
     budget: 'moderate',
     interests: [],
   });
+
+  const [destinations, setDestinations] = useState([
+    { name: 'Jaipur', region: 'Rajasthan', tags: 'Forts · Culture · Royal Heritage', image: '' },
+    { name: 'Goa', region: 'West Coast', tags: 'Beaches · Nightlife · Portuguese Heritage', image: '' },
+    { name: 'Varanasi', region: 'Uttar Pradesh', tags: 'Ghats · Spirituality · Ancient Culture', image: '' },
+    { name: 'Kerala', region: 'South India', tags: 'Backwaters · Ayurveda · Nature', image: '' },
+    { name: 'Manali', region: 'Himachal Pradesh', tags: 'Mountains · Adventure · Snow', image: '' },
+    { name: 'Udaipur', region: 'Rajasthan', tags: 'Lakes · Palaces · Romance', image: '' },
+  ]);
+
+  useEffect(() => {
+    const loadImages = async () => {
+      const updatedDests = await Promise.all(destinations.map(async (d) => {
+        const img = await getDestinationImage(d.name);
+        return { ...d, image: img };
+      }));
+      setDestinations(updatedDests);
+    };
+    loadImages();
+  }, []);
 
   const interestsOptions = [
     'Nature', 'Adventure', 'History', 'Culture', 'Food', 'Spiritual', 'Shopping', 'Family'
@@ -47,6 +69,15 @@ const Home = () => {
     };
     try {
       await localforage.setItem('currentTrip', tripData);
+
+      // Save to authenticated user profile if logged in
+      const user = await getCurrentUser();
+      if (user) {
+        const userTrips = await localforage.getItem(`trips_${user.id}`) || [];
+        userTrips.push(tripData);
+        await localforage.setItem(`trips_${user.id}`, userTrips);
+      }
+
       navigate('/dashboard');
     } catch (err) {
       console.error('Error saving trip data:', err);
@@ -54,45 +85,6 @@ const Home = () => {
   };
 
   const popularDestinations = ['Jaipur', 'Goa', 'Manali', 'Kerala', 'Varanasi', 'Rishikesh'];
-
-  const destinations = [
-    {
-      name: 'Jaipur',
-      region: 'Rajasthan',
-      tags: 'Forts · Culture · Royal Heritage',
-      image: 'https://picsum.photos/seed/jaipur/800/600',
-    },
-    {
-      name: 'Goa',
-      region: 'West Coast',
-      tags: 'Beaches · Nightlife · Portuguese Heritage',
-      image: 'https://picsum.photos/seed/goa/800/600',
-    },
-    {
-      name: 'Varanasi',
-      region: 'Uttar Pradesh',
-      tags: 'Ghats · Spirituality · Ancient Culture',
-      image: 'https://picsum.photos/seed/varanasi/800/600',
-    },
-    {
-      name: 'Kerala',
-      region: 'South India',
-      tags: 'Backwaters · Ayurveda · Nature',
-      image: 'https://picsum.photos/seed/kerala/800/600',
-    },
-    {
-      name: 'Manali',
-      region: 'Himachal Pradesh',
-      tags: 'Mountains · Adventure · Snow',
-      image: 'https://picsum.photos/seed/manali/800/600',
-    },
-    {
-      name: 'Udaipur',
-      region: 'Rajasthan',
-      tags: 'Lakes · Palaces · Romance',
-      image: 'https://picsum.photos/seed/udaipur/800/600',
-    },
-  ];
 
   const features = [
     { icon: <MapPin className="h-6 w-6" />, title: 'Plan Itinerary', desc: 'Day-wise personalized travel plans' },

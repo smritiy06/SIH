@@ -5,6 +5,7 @@ import { differenceInDays, format, addDays } from 'date-fns';
 import { getWeatherForecast, getWeatherCondition } from '../services/weatherService';
 import { getNearbyPlaces } from '../services/placesService';
 import { getLocalEvents } from '../services/eventsService';
+import { generateItinerary } from '../services/itineraryService';
 import { MapPin, Calendar, Users, Wallet, CloudSun, Utensils, Bed, CalendarDays, ShieldCheck, ArrowRight, RefreshCw, Save, Plus, Pencil, Trash2, Loader2, ExternalLink } from 'lucide-react';
 
 const Dashboard = () => {
@@ -14,6 +15,7 @@ const Dashboard = () => {
   const [weather, setWeather] = useState(null);
   const [events, setEvents] = useState({ error: false, message: '', data: [] });
   const [places, setPlaces] = useState({ attractions: [], food: [], accommodation: [] });
+  const [itinerary, setItinerary] = useState([]);
   const [activeTab, setActiveTab] = useState('itinerary');
   const [accTypeFilter, setAccTypeFilter] = useState('all');
 
@@ -22,12 +24,27 @@ const Dashboard = () => {
       try {
         const savedTrip = await localforage.getItem('currentTrip');
         if (!savedTrip) { navigate('/plan'); return; }
+        
+        // Check if the current trip is different from the previous state (to avoid stale data)
+        if (trip && trip.destination.name !== savedTrip.destination.name) {
+          setItinerary([]);
+          setWeather(null);
+          setPlaces({ attractions: [], food: [], accommodation: [] });
+        }
+        
         setTrip(savedTrip);
         const { lat, lon } = savedTrip.destination;
+
+        try {
+          const generatedItinerary = await generateItinerary(savedTrip);
+          setItinerary(generatedItinerary);
+        } catch (e) { console.error('Failed to generate itinerary', e); }
+
         try {
           const weatherData = await getWeatherForecast(lat, lon);
           setWeather(weatherData);
         } catch (e) { console.error('Failed to load weather'); }
+
         try {
           const [attractions, food, hotels, localEvents] = await Promise.all([
             getNearbyPlaces(lat, lon, 'tourism', 10000),
@@ -36,20 +53,7 @@ const Dashboard = () => {
             getLocalEvents(lat, lon)
           ]);
           
-          // Mock data fallbacks for food and accommodation
-          const finalFood = food.length > 0 ? food : [
-            { id: 'f1', name: 'The Royal Spice', type: 'restaurant', cuisine: 'Authentic Indian', stars: 4 },
-            { id: 'f2', name: 'Bazaar Cafe', type: 'cafe', cuisine: 'Coffee & Snacks', stars: 4 },
-            { id: 'f3', name: 'Streetside Delights', type: 'food', cuisine: 'Local Street Food', stars: 5 }
-          ];
-          
-          const finalHotels = hotels.length > 0 ? hotels : [
-            { id: 'h1', name: 'Grand Plaza Hotel', type: 'hotel', stars: 5 },
-            { id: 'h2', name: 'Cozy Homestay', type: 'guest_house', stars: 4 },
-            { id: 'h3', name: 'Backpacker Haven', type: 'hostel', stars: 3 }
-          ];
-
-          setPlaces({ attractions, food: finalFood, accommodation: finalHotels });
+          setPlaces({ attractions, food, accommodation: hotels });
           setEvents(localEvents);
         } catch (e) { console.error('Failed to load places or events'); }
       } catch (err) { console.error(err); }
@@ -67,46 +71,6 @@ const Dashboard = () => {
     );
   }
   if (!trip) return null;
-
-  const numDays = differenceInDays(new Date(trip.endDate), new Date(trip.startDate)) + 1;
-  const tripDates = Array.from({ length: numDays }).map((_, i) => addDays(new Date(trip.startDate), i));
-
-  const generateItinerary = () => {
-    const itinerary = [];
-    const usedAttractions = new Set();
-    
-    // Mock data fallback if APIs return no places
-    const mockAttractions = [
-      { id: 'm1', name: 'City Center Tour', type: 'attraction' },
-      { id: 'm2', name: 'Local Museum', type: 'museum' },
-      { id: 'm3', name: 'Historic Monument', type: 'monument' },
-      { id: 'm4', name: 'Central Park', type: 'park' },
-      { id: 'm5', name: 'Market Walk', type: 'shopping' },
-      { id: 'm6', name: 'Sunset Viewpoint', type: 'viewpoint' },
-    ];
-    const mockFood = [
-      { id: 'f1', name: 'Traditional Cafe', type: 'restaurant', cuisine: 'Local' },
-      { id: 'f2', name: 'Street Food Hub', type: 'food', cuisine: 'Street Food' },
-    ];
-    
-    const availableAttractions = places.attractions.length > 0 ? [...places.attractions] : mockAttractions;
-    const availableFood = places.food.length > 0 ? [...places.food] : mockFood;
-
-    for (let i = 0; i < numDays; i++) {
-      const dayActivities = [];
-      const morning = availableAttractions.find(a => !usedAttractions.has(a.id));
-      if (morning) { dayActivities.push({ time: 'Morning', type: 'attraction', place: morning }); usedAttractions.add(morning.id); }
-      const lunch = availableFood[i % Math.max(availableFood.length, 1)];
-      if (lunch) { dayActivities.push({ time: 'Lunch', type: 'food', place: lunch }); }
-      const afternoon = availableAttractions.find(a => !usedAttractions.has(a.id));
-      if (afternoon) { dayActivities.push({ time: 'Afternoon', type: 'attraction', place: afternoon }); usedAttractions.add(afternoon.id); }
-      const evening = availableAttractions.find(a => !usedAttractions.has(a.id));
-      if (evening) { dayActivities.push({ time: 'Evening', type: 'attraction', place: evening }); usedAttractions.add(evening.id); }
-      itinerary.push({ day: i + 1, date: tripDates[i], activities: dayActivities });
-    }
-    return itinerary;
-  };
-  const itinerary = generateItinerary();
 
   const tabs = [
     { id: 'itinerary', label: 'Itinerary', icon: <MapPin className="h-4 w-4" /> },
@@ -180,27 +144,28 @@ const Dashboard = () => {
             </div>
             {itinerary.length === 0 ? (
               <div className="card p-10 text-center">
-                <p className="text-charcoal-700/50 dark:text-night-500">Not enough data to generate an itinerary for this destination.</p>
+                <p className="text-charcoal-700/50 dark:text-night-500">Generating personalized itinerary...</p>
               </div>
             ) : (
               <div className="space-y-10">
-                {itinerary.map((day) => (
+                {itinerary.map((day, dayIndex) => {
+                  const dayDate = addDays(new Date(trip.startDate), day.day - 1);
+                  return (
                   <div key={day.day}>
                     <div className="flex items-baseline gap-3 mb-5">
-                      <span className="font-serif text-xl font-bold text-charcoal-900 dark:text-night-900">Day {day.day}</span>
-                      <span className="text-sm text-charcoal-700/40 dark:text-night-500">{format(day.date, 'EEEE, MMMM d')}</span>
+                      <span className="font-serif text-xl font-bold text-charcoal-900 dark:text-night-900">{day.title}</span>
+                      <span className="text-sm text-charcoal-700/40 dark:text-night-500">{format(dayDate, 'EEEE, MMMM d')}</span>
                     </div>
                     <div className="space-y-3 ml-4 border-l-2 border-cream-200 dark:border-night-300 pl-6">
                       {day.activities.map((activity, idx) => (
                         <div key={idx} className="card p-4 flex flex-col sm:flex-row gap-4 group hover:shadow-md transition-shadow">
-                          <div className="w-20 flex-shrink-0">
+                          <div className="w-24 flex-shrink-0">
                             <span className="text-xs font-semibold text-forest-700 dark:text-accent-500 uppercase tracking-wider">{activity.time}</span>
                           </div>
                           <div className="flex-grow">
-                            <h4 className="font-sans font-semibold text-charcoal-900 dark:text-night-800 mb-0.5">{activity.place.name}</h4>
-                            <p className="text-charcoal-700/50 dark:text-night-500 text-sm capitalize">
-                              {activity.type === 'food' ? activity.place.cuisine || 'Local Restaurant' : activity.place.type || 'Attraction'}
-                            </p>
+                            <h4 className="font-sans font-semibold text-charcoal-900 dark:text-night-800 mb-0.5">{activity.title}</h4>
+                            <p className="text-charcoal-700/50 dark:text-night-500 text-sm">{activity.description}</p>
+                            <p className="text-charcoal-700/40 dark:text-night-600 text-xs mt-1 italic">Duration: {activity.duration}</p>
                           </div>
                           <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button className="p-1.5 rounded-lg text-charcoal-700/40 dark:text-night-500 hover:bg-cream-100 dark:hover:bg-night-200 hover:text-forest-700 dark:hover:text-accent-500 transition-colors"><Pencil className="h-3.5 w-3.5" /></button>
@@ -213,7 +178,7 @@ const Dashboard = () => {
                       </button>
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             )}
           </div>

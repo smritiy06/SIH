@@ -1,29 +1,29 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import localforage from 'localforage';
 import { Mail, Lock, ArrowRight, User } from 'lucide-react';
+import { loginUser } from '../services/authService';
 
 const SignIn = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
+    setError('');
+    
     if (!email || !password) return;
     
-    // Mock user login
-    const user = {
-      name: email.split('@')[0],
-      email: email,
-      token: 'mock-jwt-token-123'
-    };
-    
+    setLoading(true);
     try {
-      await localforage.setItem('user', user);
+      await loginUser(email, password);
       navigate('/dashboard');
     } catch (err) {
-      console.error('Login failed', err);
+      setError(err.message || 'Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,6 +43,11 @@ const SignIn = () => {
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSignIn}>
+          {error && (
+            <div className="p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-lg text-center">
+              {error}
+            </div>
+          )}
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-charcoal-800 dark:text-night-700 mb-2">
@@ -86,16 +91,17 @@ const SignIn = () => {
           <div>
             <button
               type="submit"
-              className="btn-primary w-full justify-center py-3.5 text-base rounded-lg shadow-md hover:shadow-lg transition-all"
+              disabled={loading}
+              className="btn-primary w-full justify-center py-3.5 text-base rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-70"
             >
-              Sign In <ArrowRight className="h-4 w-4 ml-2" />
+              {loading ? 'Signing In...' : 'Sign In'} <ArrowRight className="h-4 w-4 ml-2" />
             </button>
           </div>
           
           <div className="text-center text-sm text-charcoal-700/60 dark:text-night-500 pt-4">
             Don't have an account?{' '}
-            <Link to="/plan" className="font-medium text-forest-700 dark:text-accent-500 hover:underline">
-              Start planning a trip instead
+            <Link to="/signup" className="font-medium text-forest-700 dark:text-accent-500 hover:underline">
+              Create one now
             </Link>
           </div>
         </form>

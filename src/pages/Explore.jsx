@@ -1,72 +1,41 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { getDestinationImage } from '../services/imageService';
 
 const Explore = () => {
-  const trendingDestinations = [
-    {
-      name: 'Jaipur',
-      region: 'Rajasthan',
-      tags: 'Forts · Culture · Royal Heritage',
-      image: 'https://picsum.photos/seed/jaipur/800/600',
-    },
-    {
-      name: 'Goa',
-      region: 'West Coast',
-      tags: 'Beaches · Nightlife · Portuguese Heritage',
-      image: 'https://picsum.photos/seed/goa/800/600',
-    },
-    {
-      name: 'Varanasi',
-      region: 'Uttar Pradesh',
-      tags: 'Ghats · Spirituality · Ancient Culture',
-      image: 'https://picsum.photos/seed/varanasi/800/600',
-    },
-    {
-      name: 'Kerala',
-      region: 'South India',
-      tags: 'Backwaters · Ayurveda · Nature',
-      image: 'https://picsum.photos/seed/kerala/800/600',
-    },
-    {
-      name: 'Manali',
-      region: 'Himachal Pradesh',
-      tags: 'Mountains · Adventure · Snow',
-      image: 'https://picsum.photos/seed/manali/800/600',
-    },
-    {
-      name: 'Rishikesh',
-      region: 'Uttarakhand',
-      tags: 'Yoga · Rafting · Spirituality',
-      image: 'https://picsum.photos/seed/rishikesh/800/600',
-    },
-  ];
+  const [trendingDestinations, setTrendingDestinations] = useState([
+    { name: 'Jaipur', region: 'Rajasthan', tags: 'Forts · Culture · Royal Heritage', image: '' },
+    { name: 'Goa', region: 'West Coast', tags: 'Beaches · Nightlife · Portuguese Heritage', image: '' },
+    { name: 'Varanasi', region: 'Uttar Pradesh', tags: 'Ghats · Spirituality · Ancient Culture', image: '' },
+    { name: 'Kerala', region: 'South India', tags: 'Backwaters · Ayurveda · Nature', image: '' },
+    { name: 'Manali', region: 'Himachal Pradesh', tags: 'Mountains · Adventure · Snow', image: '' },
+    { name: 'Rishikesh', region: 'Uttarakhand', tags: 'Yoga · Rafting · Spirituality', image: '' },
+  ]);
 
-  const hiddenGems = [
-    {
-      name: 'Meghalaya',
-      region: 'Northeast India',
-      tags: 'Living Root Bridges · Waterfalls · Caves',
-      image: 'https://picsum.photos/seed/meghalaya/800/600',
-    },
-    {
-      name: 'Spiti Valley',
-      region: 'Himachal Pradesh',
-      tags: 'Cold Desert · Monasteries · Stargazing',
-      image: 'https://picsum.photos/seed/spiti/800/600',
-    },
-    {
-      name: 'Andaman Islands',
-      region: 'Bay of Bengal',
-      tags: 'White Beaches · Diving · Coral Reefs',
-      image: 'https://picsum.photos/seed/andaman/800/600',
-    },
-    {
-      name: 'Hampi',
-      region: 'Karnataka',
-      tags: 'Ruins · Boulders · History',
-      image: 'https://picsum.photos/seed/hampi/800/600',
-    },
-  ];
+  const [hiddenGems, setHiddenGems] = useState([
+    { name: 'Meghalaya', region: 'Northeast India', tags: 'Living Root Bridges · Waterfalls · Caves', image: '' },
+    { name: 'Spiti Valley', region: 'Himachal Pradesh', tags: 'Cold Desert · Monasteries · Stargazing', image: '' },
+    { name: 'Andaman Islands', region: 'Bay of Bengal', tags: 'White Beaches · Diving · Coral Reefs', image: '' },
+    { name: 'Hampi', region: 'Karnataka', tags: 'Ruins · Boulders · History', image: '' },
+  ]);
+
+  useEffect(() => {
+    const loadImages = async () => {
+      const updatedTrending = await Promise.all(trendingDestinations.map(async (d) => ({
+        ...d,
+        image: await getDestinationImage(d.name)
+      })));
+      setTrendingDestinations(updatedTrending);
+
+      const updatedGems = await Promise.all(hiddenGems.map(async (d) => ({
+        ...d,
+        image: await getDestinationImage(d.name)
+      })));
+      setHiddenGems(updatedGems);
+    };
+    loadImages();
+  }, []);
 
   const DestinationCard = ({ dest, aspect = 'aspect-[4/3]' }) => (
     <Link to="/plan" className={`group relative rounded-2xl overflow-hidden ${aspect} block`}>

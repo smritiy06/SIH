@@ -7,6 +7,8 @@ import Dashboard from './pages/Dashboard';
 import Safety from './pages/Safety';
 import Explore from './pages/Explore';
 import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
+import MyTrips from './pages/MyTrips';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="safety" element={<Safety />} />
             <Route path="signin" element={<SignIn />} />
+            <Route path="signup" element={<SignUp />} />
+            <Route path="mytrips" element={<MyTrips />} />
           </Route>
         </Routes>
       </BrowserRouter>
